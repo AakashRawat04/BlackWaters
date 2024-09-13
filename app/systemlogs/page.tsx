@@ -87,24 +87,88 @@ const logEntries = [
 		content: "2d804d94ddf2c2d94f9fd19b23a016456b4b4b0",
 		color: "text-green-400",
 	},
+	// add 20 more log entries
+	{ id: 22, content: "Run actions/checkout@v2", color: "text-blue-400" },
+	{
+		id: 23,
+		content: "Syncing repository: Emurgo/cardano-backend",
+		color: "text-blue-400",
+	},
+	{ id: 24, content: "Getting Git version info", color: "text-blue-400" },
+	{
+		id: 25,
+		content:
+			"Temporarily overriding HOME='/home/runner/work/_temp/f537f586-f7dd-4fe3-9fe0-6f9999f6b94a'",
+		color: "text-blue-400",
+	},
+	{
+		id: 26,
+		content: "before making global git config changes",
+		color: "text-blue-400",
+	},
+	{
+		id: 27,
+		content:
+			"Adding repository directory to the temporary git global config as a safe directory",
+		color: "text-green-400",
+	},
+	{
+		id: 28,
+		content:
+			"/usr/bin/git config --global --add safe.directory /home/runner/work/cardano-backend",
+		color: "text-green-400",
+	},
+	{
+		id: 29,
+		content:
+			"Deleting the contents of '/home/runner/work/cardano-backend/cardano-backend'",
+		color: "text-blue-400",
+	},
+	{ id: 30, content: "Initializing the repository", color: "text-blue-400" },
+	{
+		id: 31,
+		content: "Disabling automatic garbage collection",
+		color: "text-blue-400",
+	},
+	{ id: 32, content: "Setting up auth", color: "text-blue-400" },
+	{
+		id: 33,
+		content:
+			"/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand",
+		color: "text-green-400",
+	},
+	{
+		id: 34,
+		content:
+			"/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :",
+		color: "text-green-400",
+	},
+	{
+		id: 35,
+		content:
+			"/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader",
+		color: "text-green-400",
+	},
 ];
 
 export default function SystemLogs() {
 	return (
-		<div className="flex-1 p-8 bg-[#1a1a1a] text-[#e0e0e0]">
-			<h1 className="text-3xl font-bold mb-6">System Logs</h1>
-			<ScrollArea className="h-[calc(100vh-8rem)] rounded-md border">
-				<div className="p-4">
-					{logEntries.map((entry) => (
-						<div
-							key={entry.id}
-							className={`${entry.color} font-mono text-sm mb-1`}
-						>
-							{entry.content}
-						</div>
-					))}
-				</div>
-			</ScrollArea>
+		<div className="flex flex-col h-screen bg-[#1a1a1a] text-[#e0e0e0]">
+			<h1 className="text-3xl font-bold p-8 pb-4">System Logs</h1>
+			<div className="flex-grow overflow-hidden p-8 pt-0">
+				<ScrollArea className="h-full rounded-md border border-[#3a3a3a]">
+					<div className="p-4">
+						{logEntries.map((entry) => (
+							<div
+								key={entry.id}
+								className={`${entry.color} font-mono text-sm mb-1`}
+							>
+								{entry.content}
+							</div>
+						))}
+					</div>
+				</ScrollArea>
+			</div>
 		</div>
 	);
 }

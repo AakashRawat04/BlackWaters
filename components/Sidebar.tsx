@@ -22,7 +22,12 @@ export default function Sidebar() {
 					</li>
 					<li>
 						<Link href="/resourcemonitor" className="hover:text-[#ffffff]">
-							Resource monitor
+							Telemetry
+						</Link>
+					</li>
+					<li>
+						<Link href="/cpuusagegraph" className="hover:text-[#ffffff]">
+							CPU usage Graph
 						</Link>
 					</li>
 				</ul>
