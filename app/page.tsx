@@ -12,8 +12,8 @@ import Image from 'next/image'
 
 export default function Home() {
   return (
-    <div className="bg-black w-full h-screen flex items-center justify-center">
-      <div className="flex items-center space-x-4">
+<div className="bg-[#1a1a1a] w-full h-screen flex items-center justify-center">
+	      <div className="flex items-center space-x-4">
         <h1 className="text-6xl font-bold">
           <span className="text-[#b1ff00]">Black</span>{" "}
           <span className="text-gray-400">Water</span>
