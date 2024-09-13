@@ -16,8 +16,13 @@ export default function Sidebar() {
 						</Link>
 					</li>
 					<li>
-						<Link href="#" className="hover:text-[#ffffff]">
-							Memory usage
+						<Link href="/resourceusage" className="hover:text-[#ffffff]">
+							Resource usage
+						</Link>
+					</li>
+					<li>
+						<Link href="/resourcemonitor" className="hover:text-[#ffffff]">
+							Resource monitor
 						</Link>
 					</li>
 				</ul>
