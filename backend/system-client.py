@@ -1,14 +1,19 @@
+import asyncio
+import socketio
+import socketio
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 import psutil
 import platform
 import GPUtil
-import uvicorn
-from fastapi import FastAPI, WebSocket
 from time import sleep
 import signal
 import os
 import asyncio
+import json
 
-app = FastAPI()
+# Create an async Socket.IO client
+sio = socketio.AsyncClient()
 
 def get_real_time_data() -> dict:
     uname = platform.uname()
@@ -62,51 +67,27 @@ def get_real_time_data() -> dict:
 
     return system_data
 
-def training_log() -> dict:
+async def send_system_data():
+    count = 0
+    while True:
+        data = {'system_data': f"Training Data {get_real_time_data()}"}
+        await sio.emit('system_data', data)
+        count += 1
+        await asyncio.sleep(1)
+
+@sio.event
+async def connect():
+    print('Connected to the server!')
+    await send_system_data()
+
+@sio.event
+async def disconnect():
     pass
-    
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            system_data = get_real_time_data()
-            await websocket.send_json(system_data) 
-            await asyncio.sleep(2)
-    except Exception as e:
-        print(f"Connection closed: {e}")
-    finally:
-        await websocket.close()
+# Connect to the server
+async def main():
+    await sio.connect('http://127.0.0.1:5000')
+    await sio.wait()
 
-@app.websocket("/ws2")
-async def websocket_training(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            data = await websocket.receive_json()
-            print(f"Received training data: {data}")
-            # training_data = {
-            #     "Epoch": 1,
-            #     "Batch": 1,
-            #     "Loss": 0.1,
-            #     "Accuracy": 0.9
-            # }
-            await websocket.send_json(data)
-            await asyncio.sleep(5)
-    except Exception as e:
-        print(f"Connection closed: {e}")
-    finally:
-        await websocket.close()
-
-def shutdown_server(sig, frame):
-    print("Shutting down server...")
-    process = psutil.Process(os.getpid())
-    for proc in process.children(recursive=True):
-        proc.terminate()
-    process.terminate()
-
-signal.signal(signal.SIGINT, shutdown_server)
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=3000)
+if __name__ == '__main__':
+    asyncio.run(main())
