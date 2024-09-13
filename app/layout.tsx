@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
 	title: "Black Waters",
-	description: "The Realtime Telemetry Monitoring System You love",
+	description: "The Realtime Telemetry Monitoring System You Love",
 };
 
 export default function RootLayout({
@@ -25,12 +25,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" className="dark">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased flex bg-[#1a1a1a] text-[#e0e0e0]`}
 			>
 				<Sidebar />
-				<main className="flex-1">{children}</main>
+				<main className="flex-1 p-8">{children}</main>
 			</body>
 		</html>
 	);
