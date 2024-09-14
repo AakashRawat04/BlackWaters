@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocketIO Client</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Check console for Socket.IO data</h1>
+
+    <script>
+        const socket = io('http://127.0.0.1:5000');
+
+        // Listen for connection event
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        // Listen for system data from the server
+        socket.on('system_data', (data) => {
+            console.log('Received system data:', data);
+        });
+
+        // Listen for training data from the Python client
+        socket.on('training_data', (data) => {
+            console.log('Received training data:', data);
+        });
+
+        // Handle disconnection
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    </script>
+</body>
+</html>

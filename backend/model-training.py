@@ -77,8 +77,7 @@ def training_log(epoch, step, loss_value, gradients, train_acc, test_acc=None) -
     return log_data
 
 # Modify train_model to send training data via WebSocket
-async def train_model(epochs, batch_size, websocket_url):
-    async with websockets.connect(websocket_url) as websocket:
+async def train_model(epochs, batch_size):
         for epoch in range(epochs):
             print(f"Epoch {epoch + 1}/{epochs}")
             
@@ -101,7 +100,7 @@ async def train_model(epochs, batch_size, websocket_url):
                 
                 # Send training log to the WebSocket server
                 log_data = training_log(epoch + 1, i // batch_size, loss_value, grads, train_acc)
-                await websocket.send(json.dumps(log_data))
+                # await websocket.send(json.dumps(log_data))
                 
                 if i % (batch_size * 10) == 0:
                     print(f"Step {i // batch_size}, Loss: {loss_value.numpy()}, Gradients: {[g.numpy().sum() for g in grads]}")
@@ -127,13 +126,12 @@ async def train_model(epochs, batch_size, websocket_url):
             
             # Send test accuracy log to the WebSocket server
             log_data = training_log(epoch + 1, "test", None, None, train_acc, test_acc)
-            await websocket.send(json.dumps(log_data))
+            # await websocket.send_json(json.dumps(log_data))
             
             test_acc_metric.reset_states()
 
-if __name__ == "__main__":
-    websocket_url = "ws://0.0.0.0:3000/ws2"  # Your WebSocket URL
-    asyncio.get_event_loop().run_until_complete(train_model(epochs=5, batch_size=64, websocket_url=websocket_url))
+if __name__ == "__main__": 
+    asyncio.get_event_loop().run_until_complete(train_model(epochs=5, batch_size=64))
     
     
     
