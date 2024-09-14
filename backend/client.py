@@ -84,6 +84,7 @@ async def disconnect():
 async def send_training_data(log_data):
     try:
         await sio.emit('training_data', log_data)
+        await asyncio.sleep(0) 
     except Exception as e:
         print(f"Error sending data: {e}")
 
@@ -113,8 +114,8 @@ async def train_model(epochs, batch_size):
             # Send the data immediately after each step
             await send_training_data(log_data)
 
-            if i % (batch_size * 10) == 0:
-                print(f"Step {i // batch_size}, Loss: {loss_value.numpy()}, Gradients: {[g.numpy().sum() for g in grads]}")
+            # Print log and send emit more frequently
+            print(f"Step {i // batch_size}, Loss: {loss_value.numpy()}, Gradients: {[g.numpy().sum() for g in grads]}")
 
         # Display training accuracy
         train_acc = train_acc_metric.result().numpy()
@@ -152,3 +153,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
