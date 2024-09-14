@@ -70,7 +70,7 @@ def get_real_time_data() -> dict:
 async def send_system_data():
     count = 0
     while True:
-        data = {'system_data': f"Training Data {get_real_time_data()}"}
+        data = get_real_time_data()
         await sio.emit('system_data', data)
         count += 1
         await asyncio.sleep(1)

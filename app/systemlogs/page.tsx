@@ -1,174 +1,100 @@
+"use client"
+import { useEffect, useRef, useState } from "react";
+import io from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const logEntries = [
-	{ id: 1, content: "Run actions/checkout@v2", color: "text-blue-400" },
-	{
-		id: 2,
-		content: "Syncing repository: Emurgo/cardano-backend",
-		color: "text-blue-400",
-	},
-	{ id: 3, content: "Getting Git version info", color: "text-blue-400" },
-	{
-		id: 4,
-		content:
-			"Temporarily overriding HOME='/home/runner/work/_temp/f537f586-f7dd-4fe3-9fe0-6f9999f6b94a'",
-		color: "text-blue-400",
-	},
-	{
-		id: 5,
-		content: "before making global git config changes",
-		color: "text-blue-400",
-	},
-	{
-		id: 6,
-		content:
-			"Adding repository directory to the temporary git global config as a safe directory",
-		color: "text-green-400",
-	},
-	{
-		id: 7,
-		content:
-			"/usr/bin/git config --global --add safe.directory /home/runner/work/cardano-backend",
-		color: "text-green-400",
-	},
-	{
-		id: 8,
-		content:
-			"Deleting the contents of '/home/runner/work/cardano-backend/cardano-backend'",
-		color: "text-blue-400",
-	},
-	{ id: 9, content: "Initializing the repository", color: "text-blue-400" },
-	{
-		id: 10,
-		content: "Disabling automatic garbage collection",
-		color: "text-blue-400",
-	},
-	{ id: 11, content: "Setting up auth", color: "text-blue-400" },
-	{
-		id: 12,
-		content:
-			"/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand",
-		color: "text-green-400",
-	},
-	{
-		id: 13,
-		content:
-			"/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :",
-		color: "text-green-400",
-	},
-	{
-		id: 14,
-		content:
-			"/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader",
-		color: "text-green-400",
-	},
-	{
-		id: 15,
-		content:
-			"/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :",
-		color: "text-green-400",
-	},
-	{
-		id: 16,
-		content:
-			"/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***",
-		color: "text-green-400",
-	},
-	{ id: 17, content: "Fetching the repository", color: "text-blue-400" },
-	{ id: 18, content: "Determining the checkout info", color: "text-blue-400" },
-	{ id: 19, content: "Checking out the ref", color: "text-blue-400" },
-	{
-		id: 20,
-		content: "/usr/bin/git log -1 --format='%H'",
-		color: "text-green-400",
-	},
-	{
-		id: 21,
-		content: "2d804d94ddf2c2d94f9fd19b23a016456b4b4b0",
-		color: "text-green-400",
-	},
-	// add 20 more log entries
-	{ id: 22, content: "Run actions/checkout@v2", color: "text-blue-400" },
-	{
-		id: 23,
-		content: "Syncing repository: Emurgo/cardano-backend",
-		color: "text-blue-400",
-	},
-	{ id: 24, content: "Getting Git version info", color: "text-blue-400" },
-	{
-		id: 25,
-		content:
-			"Temporarily overriding HOME='/home/runner/work/_temp/f537f586-f7dd-4fe3-9fe0-6f9999f6b94a'",
-		color: "text-blue-400",
-	},
-	{
-		id: 26,
-		content: "before making global git config changes",
-		color: "text-blue-400",
-	},
-	{
-		id: 27,
-		content:
-			"Adding repository directory to the temporary git global config as a safe directory",
-		color: "text-green-400",
-	},
-	{
-		id: 28,
-		content:
-			"/usr/bin/git config --global --add safe.directory /home/runner/work/cardano-backend",
-		color: "text-green-400",
-	},
-	{
-		id: 29,
-		content:
-			"Deleting the contents of '/home/runner/work/cardano-backend/cardano-backend'",
-		color: "text-blue-400",
-	},
-	{ id: 30, content: "Initializing the repository", color: "text-blue-400" },
-	{
-		id: 31,
-		content: "Disabling automatic garbage collection",
-		color: "text-blue-400",
-	},
-	{ id: 32, content: "Setting up auth", color: "text-blue-400" },
-	{
-		id: 33,
-		content:
-			"/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand",
-		color: "text-green-400",
-	},
-	{
-		id: 34,
-		content:
-			"/usr/bin/git submodule foreach --recursive git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :",
-		color: "text-green-400",
-	},
-	{
-		id: 35,
-		content:
-			"/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader",
-		color: "text-green-400",
-	},
-];
+// Define a type for log entry
+interface LogEntry {
+  id: number;
+  content: string;
+  color: string;
+}
+
+// Set up the WebSocket URL
+const SOCKET_URL = 'http://127.0.0.1:5000';
 
 export default function SystemLogs() {
-	return (
-		<div className="flex flex-col h-screen bg-[#1a1a1a] text-[#e0e0e0]">
-			<h1 className="text-3xl font-bold p-8 pb-4">System Logs</h1>
-			<div className="flex-grow overflow-hidden p-8 pt-0">
-				<ScrollArea className="h-full rounded-md border border-[#3a3a3a]">
-					<div className="p-4">
-						{logEntries.map((entry) => (
-							<div
-								key={entry.id}
-								className={`${entry.color} font-mono text-sm mb-1`}
-							>
-								{entry.content}
-							</div>
-						))}
-					</div>
-				</ScrollArea>
-			</div>
-		</div>
-	);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null); // Reference for the scroll container
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    const socket = io(SOCKET_URL);
+
+    // Handle incoming system data
+    socket.on('system_data', (data: string) => {
+      console.log('Received system data:', data);
+
+      // Parse the received data
+      let logContent = "";
+      try {
+        // Format the content for display
+        logContent = formatLogContent(data);
+      } catch (error) {
+        logContent = "Error parsing log data";
+        console.error("Error parsing log data:", error);
+      }
+
+      // Create a log entry
+      const logEntry: LogEntry = {
+        id: Date.now(), // Generate a unique id
+        content: logContent,
+        color: "text-gray-200", // Default color for log text
+      };
+
+      // Add the new log entry to the state
+      setLogEntries(prevEntries => [...prevEntries, logEntry]);
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+    // Clean up the WebSocket connection on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // Scroll to the bottom of the scroll container whenever logEntries change
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [logEntries]);
+
+  // Function to format log content
+  function formatLogContent(data: any): string {
+    // Customize this function to format the log content as needed
+    return `Log Data:\n${JSON.stringify(data, null, 2)}`;
+  }
+
+  return (
+    <div className="flex flex-col h-screen bg-[#1a1a1a] text-[#e0e0e0]">
+      <h1 className="text-3xl font-bold p-8 pb-4">System Logs</h1>
+      <div className="flex-grow overflow-hidden p-8 pt-0">
+        <ScrollArea
+          ref={scrollRef} // Attach the ref to the scroll area
+          className="h-full rounded-md border border-[#3a3a3a] bg-[#2a2a2a]"
+        >
+          <div className="p-4" id="logs">
+            {logEntries.length === 0 ? (
+              <div className="text-gray-500">No logs available</div>
+            ) : (
+              logEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={`${entry.color} font-mono text-sm mb-2 p-4 border border-gray-700 rounded-md shadow-sm`}
+                >
+                  {entry.content}
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
 }
