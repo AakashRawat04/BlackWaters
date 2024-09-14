@@ -6,7 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Define a type for log entry
 interface LogEntry {
   id: number;
-  content: string;
+  epoch: number;
+  step: number;
+  loss: number;
+  gradients: number[];
+  train_accuracy: number;
   color: string;
 }
 
@@ -22,28 +26,30 @@ export default function SystemLogs() {
     const socket = io(SOCKET_URL);
 
     // Handle incoming system data
-    socket.on('system_data', (data: string) => {
+    socket.on('training_data', (data: any) => {
       console.log('Received system data:', data);
 
       // Parse the received data
-      let logContent = "";
+      let logEntry: LogEntry | null = null;
       try {
-        // Format the content for display
-        logContent = formatLogContent(data);
+        // Ensure data is in the expected format
+        logEntry = {
+          id: Date.now(), // Generate a unique id
+          epoch: data.epoch ?? 0,
+          step: data.step ?? 0,
+          loss: data.loss ?? 0,
+          gradients: data.gradients ?? [],
+          train_accuracy: data.train_accuracy ?? 0,
+          color: "text-gray-200", // Default color for log text
+        };
       } catch (error) {
-        logContent = "Error parsing log data";
         console.error("Error parsing log data:", error);
       }
 
-      // Create a log entry
-      const logEntry: LogEntry = {
-        id: Date.now(), // Generate a unique id
-        content: logContent,
-        color: "text-gray-200", // Default color for log text
-      };
-
-      // Add the new log entry to the state
-      setLogEntries(prevEntries => [...prevEntries, logEntry]);
+      if (logEntry) {
+        // Add the new log entry to the state
+        setLogEntries(prevEntries => [...prevEntries, logEntry]);
+      }
     });
 
     // Handle disconnection
@@ -65,12 +71,6 @@ export default function SystemLogs() {
     }
   }, [logEntries]);
 
-  // Function to format log content
-  function formatLogContent(data: any): string {
-    // Customize this function to format the log content as needed
-    return `Log Data:\n${JSON.stringify(data, null, 2)}`;
-  }
-
   return (
     <div className="flex flex-col h-screen bg-[#1a1a1a] text-[#e0e0e0]">
       <h1 className="text-3xl font-bold p-8 pb-4">System Logs</h1>
@@ -86,9 +86,36 @@ export default function SystemLogs() {
               logEntries.map((entry) => (
                 <div
                   key={entry.id}
-                  className={`${entry.color} font-mono text-sm mb-2 p-4 border border-gray-700 rounded-md shadow-sm`}
+                  className={`font-mono text-sm mb-4 p-4 border border-gray-700 rounded-md shadow-sm ${entry.color}`}
                 >
-                  {entry.content}
+                  <div className="flex justify-between mb-2">
+                    <span className="font-semibold">Epoch:</span>
+                    <span>{entry.epoch}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="font-semibold">Step:</span>
+                    <span>{entry.step}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="font-semibold text-red-500">Loss:</span>
+                    <span>{entry.loss ? entry.loss.toFixed(4) : 'N/A'}</span>
+                  </div>
+                  <div className="flex flex-col mb-2">
+                    <span className="font-semibold text-blue-500">Gradients:</span>
+                    <div className="flex flex-wrap">
+                      {entry.gradients.length > 0 ? (
+                        entry.gradients.map((gradient, index) => (
+                          <span key={index} className="mr-2 text-green-300">{gradient.toFixed(2)}</span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500">No gradients available</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-yellow-500">Train Accuracy:</span>
+                    <span>{entry.train_accuracy ? (entry.train_accuracy * 100).toFixed(2) + '%' : 'N/A'}</span>
+                  </div>
                 </div>
               ))
             )}

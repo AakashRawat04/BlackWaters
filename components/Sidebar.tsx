@@ -30,7 +30,7 @@ export default function Sidebar() {
           </li>
           <li>
             <Button variant="outline" asChild className="w-full justify-start">
-              <Link href="/cpuusagegraph">CPU usage Graph</Link>
+              <Link href="/resourceusagegraph">Resource usage Graph</Link>
             </Button>
           </li>
         </ul>
